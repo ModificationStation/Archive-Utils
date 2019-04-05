@@ -13,9 +13,8 @@ import requests
 import getopt
 import traceback
 import bs4
-import pprint
 
-utilversion = "v0.1"
+utilversion = "v0.2"
 
 helpText = """Usage: cursescraper (params)
 
@@ -56,11 +55,13 @@ def start():
         selection = str(input("> "))
 
     site = None
+    cfSite = None
 
     if selection == "1":
         site = "https://dev.bukkit.org/bukkit-plugins"
+        cfSite = "https://api.cfwidget.com/minecraft/bukkit-plugins/"
 
-    if not site:
+    if not site or not cfSite:
         print("Site not declared. Exiting...")
         sys.exit(2)
 
@@ -78,19 +79,30 @@ def start():
         pages = bs4.BeautifulSoup(str(pages), "html.parser").find_all(match_class(["b-pagination-item"]))[-1]
         pages = int(str(pages).split("page=")[1].split("\"")[0])
 
-    print(pages)
+    print(str(pages) + " pages found.")
+    projects = {}
 
-    for index in range(pages+1): # +1 cause it runs from 1, not 0.
-        with requests.get(site + "?filter-game-version=" + versions["CB 1060"] + "&page=" + str(index)) as response:
+    for index in range(pages):
+        print("Getting page " + str(index+1) + "'s info.")
+        with requests.get(site + "?filter-game-version=" + versions["CB 1060"] + "&page=" + str(index+1)) as response:  # Add +1 cause page 0 is same as page 1.
             if response.status_code != 200:
                 break
             else:
                 page = bs4.BeautifulSoup(response.text, "html.parser")
                 page = page.findAll(match_class(["project-list-item"]))
+                count = 0
                 for project in page:
-                    print(project.find(match_class(["name-wrapper", "overflow-tip"])).get_text())
+                    count += 1
+                    projectInfo = project.find(match_class(["name-wrapper", "overflow-tip"]))
+                    projects[projectInfo.find("a").get_text().strip()] = {}
+                    projects[projectInfo.find("a").get_text().strip()]["url"] = projectInfo.find("a").get("href").split("/")[2]
+                print("Parsed " + str(count) + " projects.\n")
 
-
+    for name in projects:
+        info = projects[name]
+        print("Downloading information for " + name)
+        url = cfSite + info["url"]
+        print(url)
 
 
 
