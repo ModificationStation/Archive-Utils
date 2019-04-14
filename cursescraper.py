@@ -50,33 +50,35 @@ def match_class(target):
 
 def download(url, name, newDir=None):
     if not os.path.exists(newDir + "/" + name):
-        with requests.get(url, stream=True) as response:
-            total_length = int(response.headers.get("content-length"))
-            dl = 0
-            if response.content is None:
-                raise ConnectionError
-            try:
-                os.mkdir("tmp")
-            except:
-                pass
+        try:
+            with requests.get(url, stream=True) as response:
+                total_length = int(response.headers.get("content-length"))
+                dl = 0
+                if response.content is None:
+                    raise ConnectionError
+                try:
+                    os.mkdir("tmp")
+                except:
+                    pass
 
-            with io.open("tmp/" + name, 'wb') as fd:
-                oldDone = 0
-                for chunk in response.iter_content(chunk_size=4096):
-                    dl += len(chunk)
-                    fd.write(chunk)
-                    done = int(50 * dl / total_length)
-                    if done != oldDone:
-                        print("\r[%s%s]" % ("=" * done, " " * (50 - done)), end="")
-                        oldDone = done
+                with io.open("tmp/" + name, 'wb') as fd:
+                    oldDone = 0
+                    for chunk in response.iter_content(chunk_size=4096):
+                        dl += len(chunk)
+                        fd.write(chunk)
+                        done = int(50 * dl / total_length)
+                        if done != oldDone:
+                            print("\r[%s%s]" % ("=" * done, " " * (50 - done)), end="")
+                            oldDone = done
 
-            print("")
+                print("")
 
             if newDir:
-                try:
-                    shutil.move("tmp/" + name, newDir)
-                except Exception as e:
-                    traceback.print_exc()
+                shutil.move("tmp/" + name, newDir)
+        except Exception as e:
+            print("An exception ocurred:")
+            traceback.print_exc()
+
     else:
         print("File \"" + newDir + "/" + name + "\" already exists! Skipping.")
 
