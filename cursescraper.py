@@ -7,7 +7,7 @@ Exit codes:
 3: Missing write access.
 """
 
-utilversion = "v0.3"
+utilversion = "v0.3.4"
 print("Cursescraper " + utilversion + " starting...")
 
 import sys
@@ -187,7 +187,7 @@ def start():
                         with contextlib.closing(requests.get(site + siteSub + "/" + project["url"] + "/files/" + str(file["id"]), stream=True)) as res:
                             fileName = None
                             buffer = ""
-                            for chunk in res.iter_content(chunk_size=1024, decode_unicode=True):
+                            for chunk in res.iter_content(chunk_size=2048, decode_unicode=True):
                                 buffer = "".join([buffer, chunk])
                                 siteHeader = bs4.BeautifulSoup(buffer, "html.parser")
                                 try:
@@ -197,11 +197,13 @@ def start():
 
                                 if match:
                                     match = str(match)
+                                    print(match)
                                     fileName = match.split(" - ")
-                                    if fileName[0].lower().strip("<title>") == "archive":
-                                        fileName = fileName[3] + "-" + fileName[1].lower().strip("<title>").strip(fileName[3].lower()).strip() + ".jar"
+                                    print(fileName[0].lower().replace("<title>", ""))
+                                    if fileName[0].lower().replace("<title>", "") == "archive":
+                                        fileName = fileName[3] + "-" + fileName[1].lower().replace("<title>", "").replace(fileName[3].lower(), "").strip() + ".jar"
                                     else:
-                                        fileName = fileName[2] + "-" + fileName[0].lower().strip("<title>").strip(fileName[2].lower()).strip() + ".jar"
+                                        fileName = fileName[2] + "-" + fileName[0].lower().replace("<title>", "").replace(fileName[2].lower(), "").strip() + ".jar"
                                     fileName = "".join(c for c in fileName if c.isalnum() or c in keepcharacters).rstrip()
                                     break
 
