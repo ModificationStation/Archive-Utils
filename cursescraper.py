@@ -30,6 +30,8 @@ Accepted params:
 
 parentDir = "cursescraper_data"
 
+keepcharacters = (" ", ".", "_", "(", ")", "[", "]", "{", "}", "-")
+
 
 def getURLAsFile(url, filepath):
     print("Getting \"" + url + "\" and storing it in \"" + filepath + "\".")
@@ -128,11 +130,18 @@ def start():
 
 
     with requests.get(site + siteRepo + "?filter-game-version=" + versions[mcVersion]) as response:
-        pages = bs4.BeautifulSoup(response.text, "html.parser").find_all(match_class(["b-pagination-list", "paging-list", "j-tablesorter-pager", "j-listing-pagination"]))[0]
-        pages = bs4.BeautifulSoup(str(pages), "html.parser").find_all(match_class(["b-pagination-item"]))[-1]
-        pages = int(str(pages).split("page=")[1].split("\"")[0])
+        try:
+            pages = bs4.BeautifulSoup(response.text, "html.parser").find_all(match_class(["b-pagination-list", "paging-list", "j-tablesorter-pager", "j-listing-pagination"]))[0]
+            pages = bs4.BeautifulSoup(str(pages), "html.parser").find_all(match_class(["b-pagination-item"]))[-1]
+            pages = int(str(pages).split("page=")[1].split("\"")[0])
+        except IndexError:
+            pages = 1
 
-    print(str(pages) + " pages found.")
+    if pages == 1:
+        pagesOrPage = "page"
+    else:
+        pagesOrPage = "pages"
+    print(str(pages) + " {0} found.".format(pagesOrPage))
     projects = {}
 
     for index in range(pages):
@@ -190,6 +199,7 @@ def start():
                                     match = str(match)
                                     fileName = match.split(" - ")
                                     fileName = fileName[2] + "-" + fileName[0].lower().strip("<title>").strip(fileName[2].lower()).strip() + ".jar"
+                                    fileName = "".join(c for c in fileName if c.isalnum() or c in keepcharacters).rstrip()
                                     break
 
                         try:
