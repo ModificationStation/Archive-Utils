@@ -198,7 +198,10 @@ def start():
                                 if match:
                                     match = str(match)
                                     fileName = match.split(" - ")
-                                    fileName = fileName[2] + "-" + fileName[0].lower().strip("<title>").strip(fileName[2].lower()).strip() + ".jar"
+                                    if fileName[0].lower().strip("<title>") == "archive":
+                                        fileName = fileName[3] + "-" + fileName[1].lower().strip("<title>").strip(fileName[3].lower()).strip() + ".jar"
+                                    else:
+                                        fileName = fileName[2] + "-" + fileName[0].lower().strip("<title>").strip(fileName[2].lower()).strip() + ".jar"
                                     fileName = "".join(c for c in fileName if c.isalnum() or c in keepcharacters).rstrip()
                                     break
 
