@@ -60,3 +60,5 @@ target/
 \.idea/
 
 cursescraper_data/
+
+mcarchivescraper_data/

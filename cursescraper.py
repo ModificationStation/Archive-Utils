@@ -183,7 +183,6 @@ def start():
             else:
                 for file in json.loads(response.content)["files"]:
                     if mcVersion in [p.strip() for p in file["versions"]]:
-                        print(site + siteSub + "/" + project["url"] + "/files/" + str(file["id"]))
                         with contextlib.closing(requests.get(site + siteSub + "/" + project["url"] + "/files/" + str(file["id"]), stream=True)) as res:
                             fileName = None
                             buffer = ""
@@ -197,7 +196,6 @@ def start():
 
                                 if match:
                                     match = str(match)
-                                    print(match)
                                     fileName = match.split(" - ")
                                     print(fileName[0].lower().replace("<title>", ""))
                                     if fileName[0].lower().replace("<title>", "") == "archive":
